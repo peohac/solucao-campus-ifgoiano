@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Refeitório · IF Goiano</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f3f6f1; --surface:#ffffff; --text:#17251b; --muted:#54655a; --line:#d5ded3;
+  --verde:#1e6b34; --verde-claro:#dff0e2; --on-verde:#ffffff;
+  --urgente:#b3261e; --urgente-bg:#fde8e6; --info:#1f5fa8; --info-bg:#e4eefa; --geral:#5b6560; --geral-bg:#eceeed;
+  --aberto:#1e8a3c; --fechado:#b3261e;
+  --vh:#1e6b34; --vermelho:#cd191e;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1812; --surface:#17241b; --text:#e8f0ea; --muted:#9fb1a4; --line:#2b3d30;
+    --verde:#6fcf88; --verde-claro:#1c3524; --on-verde:#0f1812;
+    --urgente:#ff8a80; --urgente-bg:#3a1b19; --info:#8ab8f0; --info-bg:#192a40; --geral:#b0bbb4; --geral-bg:#232e27;
+    --aberto:#6fcf88; --fechado:#ff8a80; --vh:#14502a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1812; --surface:#17241b; --text:#e8f0ea; --muted:#9fb1a4; --line:#2b3d30;
+  --verde:#6fcf88; --verde-claro:#1c3524; --on-verde:#0f1812;
+  --urgente:#ff8a80; --urgente-bg:#3a1b19; --info:#8ab8f0; --info-bg:#192a40; --geral:#b0bbb4; --geral-bg:#232e27;
+  --aberto:#6fcf88; --fechado:#ff8a80; --vh:#14502a; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px 40px}
+h1,h2,h3,p,ul{margin:0}
+ul{padding:0;list-style:none}
+
+/* faixa de alerta */
+.faixa{background:var(--urgente);color:#fff;padding:10px 16px;font-weight:600;text-align:center}
+.faixa[hidden]{display:none}
+.faixa a{color:#fff}
+
+/* cabeçalho */
+header{background:var(--vh);color:#fff;margin:0 -16px;padding:26px 16px 24px;border-bottom:6px solid var(--vermelho)}
+.inst{color:rgba(255,255,255,.85);font-size:.95rem}
+h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:4px 0 2px;text-transform:capitalize}
+.data{color:rgba(255,255,255,.85)}
+.status{display:inline-flex;align-items:center;gap:10px;margin-top:16px;padding:10px 16px;border-radius:999px;background:var(--surface);color:var(--text);border:2px solid var(--line);font-weight:600}
+.status i{width:12px;height:12px;border-radius:50%;background:var(--fechado);flex:none}
+.status.aberto{border-color:var(--aberto)}
+.status.aberto i{background:var(--aberto)}
+
+h2{font-size:1.35rem;margin:36px 0 14px}
+
+/* hoje */
+.refeicoes{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:1.15rem;margin-bottom:2px}
+.card .hora{color:var(--muted);font-size:.9rem;font-weight:400}
+.card ul{margin-top:10px}
+.card li{padding:6px 0;border-top:1px solid var(--line)}
+.card li:first-child{border-top:0;font-weight:700;font-size:1.05rem}
+.card.agora{border:2px solid var(--verde);background:var(--verde-claro)}
+.tag{display:inline-block;background:var(--verde);color:var(--on-verde);font-size:.78rem;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.vazio{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px;color:var(--muted)}
+
+/* semana */
+.abas{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.abas button{flex:1 0 auto;min-width:64px;min-height:48px;padding:8px 16px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
+.abas button[aria-selected="true"]{background:var(--verde);border-color:var(--verde);color:var(--on-verde)}
+.abas button.hoje::after{content:" •"}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+#semana-det{margin-top:14px}
+
+/* avisos */
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filtros button{min-height:40px;padding:6px 14px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+.filtros button[aria-pressed="true"]{border-color:var(--verde);background:var(--verde-claro);font-weight:700}
+.aviso{border-left:6px solid var(--geral);background:var(--surface);border-radius:10px;padding:14px 16px;margin-bottom:12px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.aviso.urgente{border-left-color:var(--urgente);background:var(--urgente-bg)}
+.aviso.informativo{border-left-color:var(--info);background:var(--info-bg)}
+.aviso.geral{background:var(--surface)}
+.aviso h3{font-size:1.05rem}
+.aviso .meta{font-size:.85rem;color:var(--muted);margin-bottom:4px}
+.aviso.urgente .meta b{color:var(--urgente)}
+.aviso.informativo .meta b{color:var(--info)}
+
+footer{border-top:1px solid var(--line);margin-top:40px;padding-top:20px;color:var(--muted);font-size:.92rem}
+footer table{border-collapse:collapse;margin:8px 0 14px}
+footer td{padding:3px 18px 3px 0}
+.tema{min-height:40px;padding:6px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="faixa" id="faixa" role="alert" hidden></div>
+
+<div class="wrap">
+  <header>
+    <p class="inst">IF Goiano · Refeitório</p>
+    <h1 id="hoje-nome">Hoje</h1>
+    <p class="data" id="hoje-data"></p>
+    <div class="status" id="status" aria-live="polite"><i></i><span>Verificando…</span></div>
+  </header>
+
+  <main>
+    <section aria-labelledby="t-hoje">
+      <h2 id="t-hoje">Cardápio de hoje</h2>
+      <div id="hoje" class="refeicoes"></div>
+    </section>
+
+    <section aria-labelledby="t-semana">
+      <h2 id="t-semana">Cardápio da semana</h2>
+      <div class="abas" id="abas" role="tablist" aria-label="Dias da semana"></div>
+      <div id="semana-det" class="refeicoes" role="tabpanel"></div>
+    </section>
+
+    <section aria-labelledby="t-avisos">
+      <h2 id="t-avisos">Mural de avisos</h2>
+      <div class="filtros" id="filtros"></div>
+      <div id="avisos"></div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>Horários de funcionamento (segunda a sexta)</strong>
+    <table id="tab-horarios"></table>
+    <p>Dúvidas sobre o cardápio? Procure a coordenação do refeitório.</p>
+    <p style="margin-top:8px">Dados de exemplo, apenas para demonstração.</p>
+    <p style="margin-top:14px"><button class="tema" id="tema" type="button">Alternar tema claro/escuro</button></p>
+  </footer>
+</div>
+
+<script>
+/* ===== DADOS: edite aqui para atualizar a página ===== */
+const horarios = [
+  { id:'cafe',   nome:'Café da manhã', icone:'☕', ini:'06:30', fim:'07:30' },
+  { id:'almoco', nome:'Almoço',        icone:'🍛', ini:'11:00', fim:'13:30' },
+  { id:'jantar', nome:'Jantar',        icone:'🍲', ini:'18:00', fim:'19:30' }
+];
+
+/* 1 = segunda ... 5 = sexta. Primeiro item da lista = prato principal */
+const cardapio = {
+  1:{ cafe:['Pão com ovos mexidos','Café com leite','Mamão'],
+      almoco:['Frango assado','Arroz e feijão','Farofa','Salada de alface e tomate','Banana','Suco de acerola'],
+      jantar:['Macarrão à bolonhesa','Salada de repolho','Suco de maracujá'] },
+  2:{ cafe:['Pão com queijo','Leite com chocolate','Banana'],
+      almoco:['Carne moída com legumes','Arroz e feijão','Purê de batata','Salada de beterraba','Melancia','Suco de caju'],
+      jantar:['Sopa de legumes com frango','Torrada','Suco de goiaba'] },
+  3:{ cafe:['Tapioca com queijo','Café com leite','Melão'],
+      almoco:['Feijoada','Arroz','Couve refogada','Laranja','Suco de limão'],
+      jantar:['Arroz com carne seca','Salada de pepino','Suco de abacaxi'] },
+  4:{ cafe:['Bolo de fubá','Iogurte','Maçã'],
+      almoco:['Peixe assado','Arroz e feijão','Pirão','Salada de cenoura','Gelatina','Suco de manga'],
+      jantar:['Strogonoff de frango','Arroz e batata palha','Suco de uva'] },
+  5:{ cafe:['Pão de queijo','Café com leite','Mamão'],
+      almoco:['Galinhada goiana','Arroz branco','Vinagrete','Pudim','Suco de acerola'],
+      jantar:['Pizza de mussarela','Salada verde','Suco de laranja'] }
+};
+
+const avisos = [
+  { data:'2026-11-22', nivel:'urgente',     titulo:'Almoço de sexta com horário reduzido', texto:'Na sexta-feira o almoço será servido das 11h às 12h30, por causa da manutenção do salão.' },
+  { data:'2026-11-20', nivel:'informativo', titulo:'Traga seu cartão de acesso',            texto:'A partir da próxima semana, o cartão estudantil será exigido na entrada do refeitório.' },
+  { data:'2026-11-18', nivel:'informativo', titulo:'Cardápio de quinta alterado',           texto:'O peixe assado substitui o frango grelhado em razão da entrega de ingredientes.' },
+  { data:'2026-11-10', nivel:'geral',       titulo:'Devolução de bandejas',                 texto:'Devolva a bandeja no balcão e ajude a manter o refeitório organizado.' }
+];
+
+/* ===== FUNÇÕES ===== */
+const DIAS = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+const ABREV = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const NIVEIS = { urgente:'Urgente', informativo:'Informativo', geral:'Geral' };
+const $ = id => document.getElementById(id);
+const min = hhmm => { const [h,m] = hhmm.split(':').map(Number); return h*60+m; };
+const fmt = hhmm => hhmm.replace(':00','h').replace(':','h');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function agora(){ const d = new Date(); return { d, dia:d.getDay(), min:d.getHours()*60+d.getMinutes() }; }
+const diaUtil = n => n >= 1 && n <= 5;
+
+function refeicaoAberta(){
+  const a = agora();
+  if(!diaUtil(a.dia)) return null;
+  return horarios.find(h => a.min >= min(h.ini) && a.min < min(h.fim)) || null;
+}
+
+function cardRefeicao(h, itens, destaque){
+  return `<article class="card${destaque?' agora':''}">
+    <h3><span>${h.icone} ${h.nome}${destaque?'<span class="tag">Agora</span>':''}</span><span class="hora">${fmt(h.ini)} às ${fmt(h.fim)}</span></h3>
+    <ul>${itens.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></article>`;
+}
+
+function renderCabecalho(){
+  const a = agora();
+  $('hoje-nome').textContent = DIAS[a.dia];
+  $('hoje-data').textContent = a.d.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function renderStatus(){
+  const a = agora(), el = $('status'), txt = el.querySelector('span');
+  const aberta = refeicaoAberta();
+  el.classList.toggle('aberto', !!aberta);
+  if(aberta){ txt.textContent = `${aberta.nome} aberto agora, encerra às ${fmt(aberta.fim)}`; return; }
+  if(diaUtil(a.dia)){
+    const prox = horarios.find(h => a.min < min(h.ini));
+    if(prox){ txt.textContent = `Fechado. ${prox.nome} abre às ${fmt(prox.ini)}`; return; }
+  }
+  let off = 1; while(!diaUtil((a.dia+off)%7)) off++;
+  const nomeDia = off===1 ? 'amanhã' : DIAS[(a.dia+off)%7];
+  txt.textContent = `Fechado. Volta ${nomeDia} às ${fmt(horarios[0].ini)}`;
+}
+
+function renderHoje(){
+  const a = agora(), box = $('hoje');
+  if(!diaUtil(a.dia)){
+    box.innerHTML = '<p class="vazio">O refeitório não funciona aos fins de semana. Veja o cardápio de segunda-feira logo abaixo.</p>';
+    return;
+  }
+  const aberta = refeicaoAberta();
+  box.innerHTML = horarios.map(h => cardRefeicao(h, cardapio[a.dia][h.id], aberta && aberta.id===h.id)).join('');
+}
+
+let diaSel;
+function renderSemana(){
+  const hojeN = agora().dia;
+  $('abas').innerHTML = [1,2,3,4,5].map(n =>
+    `<button type="button" role="tab" data-dia="${n}" aria-selected="${n===diaSel}" class="${n===hojeN?'hoje':''}">${ABREV[n]}</button>`).join('');
+  $('semana-det').innerHTML = horarios.map(h => cardRefeicao(h, cardapio[diaSel][h.id], false)).join('');
+  document.querySelectorAll('#abas button').forEach(b => b.onclick = () => { diaSel = +b.dataset.dia; renderSemana(); });
+}
+
+let filtro = 'todos';
+function renderAvisos(){
+  const ordem = { urgente:0, informativo:1, geral:2 };
+  $('filtros').innerHTML = ['todos','urgente','informativo','geral'].map(f =>
+    `<button type="button" data-f="${f}" aria-pressed="${f===filtro}">${f==='todos'?'Todos':NIVEIS[f]}</button>`).join('');
+  document.querySelectorAll('#filtros button').forEach(b => b.onclick = () => { filtro = b.dataset.f; renderAvisos(); });
+
+  const lista = avisos.filter(v => filtro==='todos' || v.nivel===filtro)
+    .sort((x,y) => ordem[x.nivel]-ordem[y.nivel] || y.data.localeCompare(x.data));
+  $('avisos').innerHTML = lista.length ? lista.map(v => {
+    const dt = new Date(v.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    return `<article class="aviso ${v.nivel}"><p class="meta"><b>${NIVEIS[v.nivel]}</b> · ${dt}</p><h3>${esc(v.titulo)}</h3><p>${esc(v.texto)}</p></article>`;
+  }).join('') : '<p class="vazio">Nenhum aviso nesta categoria.</p>';
+}
+
+function renderFaixa(){
+  const u = avisos.filter(v => v.nivel==='urgente').sort((x,y) => y.data.localeCompare(x.data))[0];
+  const f = $('faixa');
+  if(u){ f.hidden = false; f.innerHTML = `<a href="#t-avisos">${esc(u.titulo)}</a>`; } else f.hidden = true;
+}
+
+function renderHorarios(){
+  $('tab-horarios').innerHTML = horarios.map(h => `<tr><td>${h.icone} ${h.nome}</td><td>${fmt(h.ini)} às ${fmt(h.fim)}</td></tr>`).join('');
+}
+
+/* tema (escolha só vale enquanto a página estiver aberta) */
+$('tema').onclick = () => {
+  const r = document.documentElement;
+  const escuro = r.dataset.theme ? r.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme = escuro ? 'light' : 'dark';
+};
+
+/* início */
+const d0 = agora().dia;
+diaSel = diaUtil(d0) ? d0 : 1;
+renderCabecalho(); renderStatus(); renderHoje(); renderSemana(); renderAvisos(); renderFaixa(); renderHorarios();
+setInterval(() => { renderStatus(); renderHoje(); }, 60000);
+</script>
+</body>
+</html>
